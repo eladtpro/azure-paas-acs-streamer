@@ -1,16 +1,10 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Net;
+﻿using System.Net;
 using System.Net.Http;
 using System.Text;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.Management.Media.Models;
-using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-
 
 namespace RadioArchive
 {
@@ -29,19 +23,19 @@ namespace RadioArchive
         }
 
 
-        [FunctionName("RadioArchive")]
+        [FunctionName("AudioStreamer")]
         public async Task<HttpResponseMessage> Run(
             [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest request,
             [Blob("data/{Query.name}", FileAccess.Read, Connection = "AzureWebJobsStorage")] Stream blob)
         {
-            logger.LogInformation("C# HTTP trigger function processed a request.");
-            logger.LogInformation($"CreateMediaServicesClientAsync token: {settings}");
+            logger.LogInformation("[AudioStreamer] C# HTTP trigger function processed a request.");
+            logger.LogInformation($"[AudioStreamer] CreateMediaServicesClientAsync token: {settings}");
 
             string name = request.Query["name"];
-            logger.LogInformation($"Blob name {name}, blob length {blob.Length}");
+            logger.LogInformation($"[AudioStreamer] Blob name {name}, blob length {blob.Length}");
 
             IDictionary<string, StreamingPath> urls = await generator.Generate(name, blob);
-            logger.LogInformation($"RadioArchive urls: {urls}");
+            logger.LogInformation($"[AudioStreamer] urls: {urls}");
 
             return new HttpResponseMessage(HttpStatusCode.OK)
             {

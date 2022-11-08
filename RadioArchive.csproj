@@ -26,18 +26,16 @@
     <None Remove="Extensions\" />
     <None Remove="Microsoft.Rest.ClientRuntime.Azure.Authentication" />
     <None Remove="Microsoft.Azure.Storage.Blob" />
+    <None Remove="Core\" />
   </ItemGroup>
   <ItemGroup>
     <None Update="host.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="local.settings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Interfaces\" />
     <Folder Include="Extensions\" />
+    <Folder Include="Core\" />
   </ItemGroup>
 </Project>

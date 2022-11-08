@@ -1,16 +1,8 @@
 ﻿using Microsoft.Azure.Management.Media.Models;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using Azure.Storage.Blobs;
-using Azure.Storage.Blobs.Models;
 using Microsoft.Azure.Management.Media;
 using Microsoft.Rest;
 using Microsoft.Rest.Azure;
 using Microsoft.Rest.Azure.OData;
-using System.Threading.Tasks;
 using Azure.Identity;
 using Azure.Core;
 
@@ -211,24 +203,7 @@ namespace RadioArchive
                 {
                     new TransformOutput
                     {
-//                        // The preset for the Transform is set to one of Media Services built-in sample presets.
-//                        // You can  customize the encoding settings by changing this to use "StandardEncoderPreset" class.
-//                        Preset = new BuiltInStandardEncoderPreset()
-//                        {
-//                            // This sample uses the built-in encoding preset for Adaptive Bitrate Streaming.
-//                            PresetName = EncoderNamedPreset.AdaptiveStreaming
-//                        }
-                        Preset = new StandardEncoderPreset
-                        {
-                            Codecs = {new CopyAudio(), new AacAudio {
-                                Channels = 2,
-                                SamplingRate = 48000,
-                                Bitrate = 128000,
-                                Profile = AacAudioProfile.AacLc,
-                                Label = "aac-lc"
-                            } },
-                            Formats = {new Mp4Format()}
-                        }
+                        Preset = PresetFactory.AacAudio
                     }
                 };
 

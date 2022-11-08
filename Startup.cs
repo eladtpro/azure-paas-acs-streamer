@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.Azure.Functions.Extensions.DependencyInjection;
+﻿using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Azure.WebJobs.Host.Bindings;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,7 +17,7 @@ namespace RadioArchive
 
             IConfigurationRoot config = new ConfigurationBuilder()
                 .SetBasePath(options.AppDirectory)
-                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddJsonFile("local.settings.json", optional: true, reloadOnChange: true)
                 .AddEnvironmentVariables()
                 .Build();
 
@@ -43,7 +42,6 @@ namespace RadioArchive
                 settings.AssetExpiryHours = expiry;
             else
                 settings.AssetExpiryHours = 168;
-
 
             //config.GetSection(Settings.MediaSettings).Bind(settings);
             Console.Write($"ISettings Configurations: {settings}");

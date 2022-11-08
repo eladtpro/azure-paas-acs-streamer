@@ -1,10 +1,4 @@
-﻿using Microsoft.Azure.Storage.Blob;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Extensions.Logging;
-using System.IO;
-using System.Threading.Tasks;
-
-namespace RadioArchive
+﻿namespace RadioArchive
 {
     public class PrepareStreamingContent
     {

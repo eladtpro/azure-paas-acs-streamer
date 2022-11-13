@@ -5,6 +5,7 @@
   },
   "Values": {
     "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "AzureInputStorage": "UseDevelopmentStorage=true",
     "AccountName": "STORAGE_ACCOUNT_NAME",
     "ResourceGroup": "RESOURCE_GROUP_NAME",
     "SubscriptionId": "SUBSCRIPTION_ID",

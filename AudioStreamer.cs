@@ -26,7 +26,7 @@ namespace RadioArchive
         [FunctionName("AudioStreamer")]
         public async Task<HttpResponseMessage> Run(
             [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest request,
-            [Blob("data/{Query.name}", FileAccess.Read, Connection = "AzureWebJobsStorage")] Stream blob)
+            [Blob("data/{Query.name}", FileAccess.Read, Connection = "AzureInputStorage")] Stream blob)
         {
             logger.LogInformation("[AudioStreamer] C# HTTP trigger function processed a request.");
             logger.LogInformation($"[AudioStreamer] CreateMediaServicesClientAsync token: {settings}");

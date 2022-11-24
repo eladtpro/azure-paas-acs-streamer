@@ -195,7 +195,17 @@ namespace RadioArchive
         {
             // Does a Transform already exist with the desired name? Assume that an existing Transform with the desired name
             // also uses the same recipe or Preset for processing content.
-            Transform transform = await client.Transforms.GetAsync(settings.ResourceGroup, settings.AccountName, settings.StreamingTransformName);
+            Transform transform = null;
+
+            try
+            {
+                transform = await client.Transforms.GetAsync(settings.ResourceGroup, settings.AccountName, settings.StreamingTransformName);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, $"Failed client.Transforms.GetAsync({settings.ResourceGroup}, {settings.AccountName}, {settings.StreamingTransformName})");
+            }
+
 
             if (transform == null)
             {

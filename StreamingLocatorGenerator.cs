@@ -70,6 +70,7 @@ namespace RadioArchive
         private async Task<StreamingLocator> GetStreamLocator(IAzureMediaServicesClient client, string name)
         {
             ODataQuery<StreamingLocator> query = new ODataQuery<StreamingLocator>((loc) => loc.Name == name);
+            logger.LogInformation($"lient.StreamingLocators.ListAsync({settings.ResourceGroup}, {settings.AccountName}, {query})");
             IPage<StreamingLocator> locators = await client.StreamingLocators.ListAsync(settings.ResourceGroup, settings.AccountName, query);
             StreamingLocator locator = locators.FirstOrDefault();
             logger.LogInformation($"Locator {name}: {locator}");

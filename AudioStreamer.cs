@@ -14,14 +14,12 @@ namespace RadioArchive
         private readonly ILogger<AudioStreamer> logger;
         private readonly IStreamingLocatorGenerator generator;
 
-
         public AudioStreamer(ISettings settings, IStreamingLocatorGenerator generator, ILogger<AudioStreamer> logger)
         {
             this.settings = settings;
             this.generator = generator;
             this.logger = logger;
         }
-
 
         [FunctionName("AudioStreamer")]
         public async Task<HttpResponseMessage> Run(

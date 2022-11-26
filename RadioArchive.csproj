@@ -30,10 +30,12 @@
     <None Remove="Microsoft.Rest.ClientRuntime.Azure.Authentication" />
     <None Remove="Microsoft.Azure.Storage.Blob" />
     <None Remove="Core\" />
-    <None Remove="Model\" />
   </ItemGroup>
   <ItemGroup>
     <None Update="host.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="local.settings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
@@ -41,6 +43,5 @@
     <Folder Include="Interfaces\" />
     <Folder Include="Extensions\" />
     <Folder Include="Core\" />
-    <Folder Include="Model\" />
   </ItemGroup>
 </Project>

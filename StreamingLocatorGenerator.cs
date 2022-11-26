@@ -197,7 +197,7 @@ namespace RadioArchive
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, $"Failed client.Transforms.GetAsync({settings.ResourceGroup}, {settings.MediaServicesAccountName}, {settings.StreamingTransformName})");
+                logger.LogWarning(ex, $"Could not fetch Transform. Details: client.Transforms.GetAsync({settings.ResourceGroup}, {settings.MediaServicesAccountName}, {settings.StreamingTransformName})");
             }
 
 

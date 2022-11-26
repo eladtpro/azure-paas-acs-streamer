@@ -4,6 +4,9 @@
 # Azure Functions localsettings file
 local.settings.json
 # appsettings.json
+__blobstorage__
+__azurite_db_blob__.json
+__azurite_db_blob_extent__.json
 
 # User-specific files
 *.suo

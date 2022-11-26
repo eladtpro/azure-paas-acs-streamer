@@ -3,6 +3,9 @@
     <TargetFramework>net6.0</TargetFramework>
     <AzureFunctionsVersion>v4</AzureFunctionsVersion>
   </PropertyGroup>
+  <PropertyGroup>
+    <PublishReadyToRun>true</PublishReadyToRun>
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="4.0.1" />
     <PackageReference Include="Microsoft.Azure.Management.Media" Version="6.0.0" />
@@ -27,6 +30,7 @@
     <None Remove="Microsoft.Rest.ClientRuntime.Azure.Authentication" />
     <None Remove="Microsoft.Azure.Storage.Blob" />
     <None Remove="Core\" />
+    <None Remove="Model\" />
   </ItemGroup>
   <ItemGroup>
     <None Update="host.json">
@@ -37,5 +41,6 @@
     <Folder Include="Interfaces\" />
     <Folder Include="Extensions\" />
     <Folder Include="Core\" />
+    <Folder Include="Model\" />
   </ItemGroup>
 </Project>

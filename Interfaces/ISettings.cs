@@ -5,10 +5,10 @@ namespace RadioArchive
     {
         string AzureWebJobsStorage { get; set; }
         bool AutoProcessStreamingLocator { get; set; }
-        public string AccountName { get; set; }
+        public string MediaServicesAccountName { get; set; }
         public string ResourceGroup { get; set; }
         public string SubscriptionId { get; set; }
-        public double AssetExpiryHours { get; set; }
+        public double ContainerSasExpiryHours { get; set; }
         public string DefaultStreamingEndpointName { get; set; }
         public string StreamingLocatorScheme { get; set; }
         public string AssetStorageAccountName { get; set; }

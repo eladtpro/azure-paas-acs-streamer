@@ -22,7 +22,7 @@
                 if (ContentType.Audio == blob.Properties.ContentType.ResolveType())
                 {
                     using Stream stream = await blob.OpenReadAsync();
-                    await generator.Generate(name, stream);
+                    await generator.Generate(new LocatorRequest(name, stream));
                 }
         }
     }

@@ -17,61 +17,55 @@ namespace RadioArchive
         {
             this.settings = settings;
             this.logger = logger;
-
         }
 
-        public async Task<IDictionary<string, StreamingPath>> Generate(string blobName, Stream blob, TimeSpan? start = null, TimeSpan? end = null)
+        public async Task<IDictionary<string, StreamingPath>> Generate(LocatorRequest request)
         {
-            string name = blobName.Sanitize();
+            string name = request.Name.Sanitize();
             try
             {
-                logger.LogInformation("CreateMediaServicesClientAsync");
+                logger.LogInformation($"[StreamingLocatorGenerator.Generate] CreateMediaServicesClientAsync {request}");
                 IAzureMediaServicesClient client = await CreateMediaServicesClientAsync();
                 logger.LogInformation($"GetStreamLocator name:{name}");
                 StreamingLocator locator = await GetStreamLocator(client, name);
                 if (null == locator)
                 {
-                    logger.LogInformation($"CreateInputAssetAsync name:{name}.input");
-                    Asset input = await CreateInputAssetAsync(client, $"{name}.input", blob);
-                    logger.LogInformation($"CreateOutputAssetAsync name:{name}.output");
+                    logger.LogInformation($"[StreamingLocatorGenerator.Generate] CreateInputAssetAsync name:{name}.input");
+                    Asset input = await CreateInputAssetAsync(client, $"{name}.input", request.Blob);
+                    logger.LogInformation($"[StreamingLocatorGenerator.Generate] CreateOutputAssetAsync name:{name}.output");
                     Asset output = await CreateOutputAssetAsync(client, $"{name}.output");
-                    logger.LogInformation($"GetOrCreateTransformAsync");
+                    logger.LogInformation($"[StreamingLocatorGenerator.Generate] GetOrCreateTransformAsync");
                     Transform transform = await GetOrCreateTransformAsync(client);
-                    logger.LogInformation($"SubmitJobAsync name: {name}");
+                    logger.LogInformation($"[StreamingLocatorGenerator.Generate] SubmitJobAsync name: {name}");
                     Job job = await SubmitJobAsync(client, name, input, output);
-                    logger.LogInformation($"WaitForJobToFinishAsync job: {job.Name}");
+                    logger.LogInformation($"[StreamingLocatorGenerator.Generate] WaitForJobToFinishAsync job: {job.Name}");
                     await WaitForJobToFinishAsync(job);
-                    logger.LogInformation($"CreateStreamingLocatorAsync name: {name}");
+                    logger.LogInformation($"[StreamingLocatorGenerator.Generate] CreateStreamingLocatorAsync name: {name}");
                     locator = await CreateStreamingLocatorAsync(client, output, name);
-                    logger.LogInformation($"CleanUp name: {name}");
+                    logger.LogInformation($"[StreamingLocatorGenerator.Generate] CleanUp name: {name}");
                     await CleanUp(client, input, job);
                 }
-                logger.LogInformation($"GetStreamingUrlsAsync locator:{locator}");
+                logger.LogInformation($"[StreamingLocatorGenerator.Generate] GetStreamingUrlsAsync locator:{locator}");
+                logger.LogInformation($"[StreamingLocatorGenerator.Generate] Success locator:{locator}, request:{request}");
                 return await GetStreamingUrlsAsync(client, locator);
             }
             catch (ErrorResponseException ex)
             {
-                logger.LogError(ex, ex.Body.Error.Message);
+                logger.LogError(ex, $"[StreamingLocatorGenerator.Generate] Error (Response):{ex.Body.Error.Message}, request:{request}");
                 throw;
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, ex.Message);
+                logger.LogError(ex, $"[StreamingLocatorGenerator.Generate] Error:{ex.Message}, request:{request}");
                 throw;
             }
-            finally
-            {
-                logger.LogInformation($"Completed Blob name {name}, blob length {blob.Length}");
-            }
-
-
         }
 
         private async Task<StreamingLocator> GetStreamLocator(IAzureMediaServicesClient client, string name)
         {
             ODataQuery<StreamingLocator> query = new ODataQuery<StreamingLocator>((loc) => loc.Name == name);
-            logger.LogInformation($"lient.StreamingLocators.ListAsync({settings.ResourceGroup}, {settings.AccountName}, {query})");
-            IPage<StreamingLocator> locators = await client.StreamingLocators.ListAsync(settings.ResourceGroup, settings.AccountName, query);
+            logger.LogInformation($"lient.StreamingLocators.ListAsync({settings.ResourceGroup}, {settings.MediaServicesAccountName}, {query})");
+            IPage<StreamingLocator> locators = await client.StreamingLocators.ListAsync(settings.ResourceGroup, settings.MediaServicesAccountName, query);
             StreamingLocator locator = locators.FirstOrDefault();
             logger.LogInformation($"Locator {name}: {locator}");
             return locator;
@@ -81,9 +75,9 @@ namespace RadioArchive
         {
             try
             {
-                await client.Assets.DeleteAsync(settings.ResourceGroup, settings.AccountName, input.Name);
+                await client.Assets.DeleteAsync(settings.ResourceGroup, settings.MediaServicesAccountName, input.Name);
                 if (settings.DeleteJobs)
-                    await client.Jobs.DeleteAsync(settings.ResourceGroup, settings.AccountName, settings.StreamingTransformName, job.Name);
+                    await client.Jobs.DeleteAsync(settings.ResourceGroup, settings.MediaServicesAccountName, settings.StreamingTransformName, job.Name);
 
             }
             catch (Exception ex)
@@ -96,17 +90,17 @@ namespace RadioArchive
         {
             IDictionary<string, StreamingPath> streamingUrls = new Dictionary<string, StreamingPath>();
 
-            StreamingEndpoint streamingEndpoint = await client.StreamingEndpoints.GetAsync(settings.ResourceGroup, settings.AccountName, settings.DefaultStreamingEndpointName);
+            StreamingEndpoint streamingEndpoint = await client.StreamingEndpoints.GetAsync(settings.ResourceGroup, settings.MediaServicesAccountName, settings.DefaultStreamingEndpointName);
 
             if (streamingEndpoint != null)
             {
                 if (streamingEndpoint.ResourceState != StreamingEndpointResourceState.Running)
                 {
-                    await client.StreamingEndpoints.StartAsync(settings.ResourceGroup, settings.AccountName, settings.DefaultStreamingEndpointName);
+                    await client.StreamingEndpoints.StartAsync(settings.ResourceGroup, settings.MediaServicesAccountName, settings.DefaultStreamingEndpointName);
                 }
             }
 
-            ListPathsResponse paths = await client.StreamingLocators.ListPathsAsync(settings.ResourceGroup, settings.AccountName, locator.Name);
+            ListPathsResponse paths = await client.StreamingLocators.ListPathsAsync(settings.ResourceGroup, settings.MediaServicesAccountName, locator.Name);
 
             foreach (StreamingPath path in paths.StreamingPaths)
             {
@@ -125,13 +119,13 @@ namespace RadioArchive
         private async Task<StreamingLocator> CreateStreamingLocatorAsync(IAzureMediaServicesClient client, Asset output, string name)
         {
             ODataQuery<StreamingLocator> query = new ODataQuery<StreamingLocator>((loc) => loc.Name == name);
-            IPage<StreamingLocator> locators = await client.StreamingLocators.ListAsync(settings.ResourceGroup, settings.AccountName, query);
+            IPage<StreamingLocator> locators = await client.StreamingLocators.ListAsync(settings.ResourceGroup, settings.MediaServicesAccountName, query);
 
             StreamingLocator locator = locators.FirstOrDefault();
 
             locator ??= await client.StreamingLocators.CreateAsync(
                 settings.ResourceGroup,
-                settings.AccountName,
+                settings.MediaServicesAccountName,
                 name,
                 new StreamingLocator
                 {
@@ -167,7 +161,7 @@ namespace RadioArchive
         private async Task<Job> SubmitJobAsync(IAzureMediaServicesClient client, string jobName, Asset input, Asset output, TimeSpan? start = null, TimeSpan? end = null)
         {
             ODataQuery<Job> query = new ODataQuery<Job>(j => j.Name == jobName);
-            IPage<Job> jobs = await client.Jobs.ListAsync(settings.ResourceGroup, settings.AccountName, settings.StreamingTransformName, query);
+            IPage<Job> jobs = await client.Jobs.ListAsync(settings.ResourceGroup, settings.MediaServicesAccountName, settings.StreamingTransformName, query);
             Job job = jobs.FirstOrDefault();
 
 
@@ -177,7 +171,7 @@ namespace RadioArchive
 
             job ??= await client.Jobs.CreateAsync(
                 settings.ResourceGroup,
-                settings.AccountName,
+                settings.MediaServicesAccountName,
                 settings.StreamingTransformName,
                 jobName,
                 new Job
@@ -199,11 +193,11 @@ namespace RadioArchive
 
             try
             {
-                transform = await client.Transforms.GetAsync(settings.ResourceGroup, settings.AccountName, settings.StreamingTransformName);
+                transform = await client.Transforms.GetAsync(settings.ResourceGroup, settings.MediaServicesAccountName, settings.StreamingTransformName);
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, $"Failed client.Transforms.GetAsync({settings.ResourceGroup}, {settings.AccountName}, {settings.StreamingTransformName})");
+                logger.LogError(ex, $"Failed client.Transforms.GetAsync({settings.ResourceGroup}, {settings.MediaServicesAccountName}, {settings.StreamingTransformName})");
             }
 
 
@@ -219,7 +213,7 @@ namespace RadioArchive
                 };
 
                 // Create the Transform with the output defined above
-                transform = await client.Transforms.CreateOrUpdateAsync(settings.ResourceGroup, settings.AccountName, settings.StreamingTransformName, output);
+                transform = await client.Transforms.CreateOrUpdateAsync(settings.ResourceGroup, settings.MediaServicesAccountName, settings.StreamingTransformName, output);
             }
 
             return transform;
@@ -231,7 +225,7 @@ namespace RadioArchive
             {
                 StorageAccountName = settings.AssetStorageAccountName
             };
-            return await client.Assets.CreateOrUpdateAsync(settings.ResourceGroup, settings.AccountName, assetName, parameters);
+            return await client.Assets.CreateOrUpdateAsync(settings.ResourceGroup, settings.MediaServicesAccountName, assetName, parameters);
         }
 
         private async Task<Asset> CreateInputAssetAsync(IAzureMediaServicesClient client, string assetName, Stream blob)
@@ -241,16 +235,16 @@ namespace RadioArchive
                 StorageAccountName = settings.AssetStorageAccountName
 
             };
-            Asset asset = await client.Assets.CreateOrUpdateAsync(settings.ResourceGroup, settings.AccountName, assetName, parameters);
+            Asset asset = await client.Assets.CreateOrUpdateAsync(settings.ResourceGroup, settings.MediaServicesAccountName, assetName, parameters);
             Console.WriteLine($"Input Asset created {asset.Name}, modified: {asset.LastModified}");
 
 
             AssetContainerSas response = await client.Assets.ListContainerSasAsync(
                 settings.ResourceGroup,
-                settings.AccountName,
+                settings.MediaServicesAccountName,
                 asset.Name,
                 permissions: AssetContainerPermission.ReadWrite,
-                expiryTime: DateTime.UtcNow.AddHours(settings.AssetExpiryHours).ToUniversalTime());
+                expiryTime: DateTime.UtcNow.AddHours(settings.ContainerSasExpiryHours).ToUniversalTime());
 
             Uri sasUri = new Uri(response.AssetContainerSasUrls.First());
             Console.WriteLine(sasUri);

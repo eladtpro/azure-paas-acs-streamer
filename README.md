@@ -123,7 +123,7 @@ public static async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.F
     try
     {
         // Ensure that you have the encoding Transform.  This is really a one time setup operation.
-        transform = await CreateEncodingTransform(client, log, config.ResourceGroup, config.AccountName, data.TransformName, data.BuiltInPreset);
+        transform = await CreateEncodingTransform(client, log, config.ResourceGroup, config.MediaServicesAccountName, data.TransformName, data.BuiltInPreset);
         log.LogInformation("Transform retrieved.");
     }
     catch (Exception e)
@@ -137,7 +137,7 @@ public static async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.F
     try
     {
         // Output from the job must be written to an Asset, so let's create one
-        outputAsset = await CreateOutputAssetAsync(client, log, config.ResourceGroup, config.AccountName, outputAssetName, data.OutputAssetStorageAccount);
+        outputAsset = await CreateOutputAssetAsync(client, log, config.ResourceGroup, config.MediaServicesAccountName, outputAssetName, data.OutputAssetStorageAccount);
         log.LogInformation($"Output asset '{outputAssetName}' created.");
     }
     catch (Exception e)
@@ -168,7 +168,7 @@ public static async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.F
                                    client,
                                    log,
                                    config.ResourceGroup,
-                                   config.AccountName,
+                                   config.MediaServicesAccountName,
                                    data.TransformName,
                                    jobName,
                                    jobInput,
@@ -209,7 +209,7 @@ JSONCopy
     "AadEndpoint": "https://login.microsoftonline.com",
     "AadSecret": "00000000-0000-0000-0000-000000000000",
     "AadTenantId": "00000000-0000-0000-0000-000000000000",
-    "AccountName": "amsaccount",
+    "MediaServicesAccountName": "amsaccount",
     "ArmAadAudience": "https://management.core.windows.net/",
     "ArmEndpoint": "https://management.azure.com/",
     "ResourceGroup": "amsResourceGroup",

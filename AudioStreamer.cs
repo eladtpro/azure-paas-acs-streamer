@@ -32,7 +32,7 @@ namespace RadioArchive
             string name = request.Query["name"];
             logger.LogInformation($"[AudioStreamer] Blob name {name}, blob length {blob.Length}");
 
-            IDictionary<string, StreamingPath> urls = await generator.Generate(name, blob);
+            IDictionary<string, StreamingPath> urls = await generator.Generate(new LocatorRequest( name, blob));
             logger.LogInformation($"[AudioStreamer] urls: {urls}");
 
             return new HttpResponseMessage(HttpStatusCode.OK)

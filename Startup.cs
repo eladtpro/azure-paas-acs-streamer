@@ -24,7 +24,7 @@ namespace RadioArchive
             ISettings settings = new Settings
             {
                 AzureWebJobsStorage = Environment.GetEnvironmentVariable("AzureWebJobsStorage", EnvironmentVariableTarget.Process),
-                AccountName = Environment.GetEnvironmentVariable("AccountName", EnvironmentVariableTarget.Process),
+                MediaServicesAccountName = Environment.GetEnvironmentVariable("MediaServicesAccountName", EnvironmentVariableTarget.Process),
                 ResourceGroup = Environment.GetEnvironmentVariable("ResourceGroup", EnvironmentVariableTarget.Process),
                 SubscriptionId = Environment.GetEnvironmentVariable("SubscriptionId", EnvironmentVariableTarget.Process),
                 DefaultStreamingEndpointName = Environment.GetEnvironmentVariable("DefaultStreamingEndpointName", EnvironmentVariableTarget.Process),
@@ -38,10 +38,10 @@ namespace RadioArchive
                 settings.AutoProcessStreamingLocator = autoLocator;
             if (bool.TryParse(Environment.GetEnvironmentVariable("DeleteJobs", EnvironmentVariableTarget.Process), out bool delJobs))
                 settings.DeleteJobs = delJobs;
-            if (int.TryParse(Environment.GetEnvironmentVariable("AssetExpiryHours", EnvironmentVariableTarget.Process), out int expiry))
-                settings.AssetExpiryHours = expiry;
+            if (int.TryParse(Environment.GetEnvironmentVariable("ContainerSasExpiryHours", EnvironmentVariableTarget.Process), out int expiry))
+                settings.ContainerSasExpiryHours = expiry;
             else
-                settings.AssetExpiryHours = 168;
+                settings.ContainerSasExpiryHours = 1;
 
             //config.GetSection(Settings.MediaSettings).Bind(settings);
             Console.Write($"ISettings Configurations: {settings}");

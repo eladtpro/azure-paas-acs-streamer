@@ -7,10 +7,10 @@ namespace RadioArchive
 
         public string   AzureWebJobsStorage             { get; set; }
         public bool     AutoProcessStreamingLocator     { get; set; }
-        public string   AccountName                     { get; set; }
+        public string   MediaServicesAccountName        { get; set; }
         public string   ResourceGroup                   { get; set; }
         public string   SubscriptionId                  { get; set; }
-        public double   AssetExpiryHours                { get; set; }
+        public double   ContainerSasExpiryHours                { get; set; }
         public string   DefaultStreamingEndpointName    { get; set; }
         public string   StreamingLocatorScheme          { get; set; }
         public string   AssetStorageAccountName         { get; set; }
@@ -20,7 +20,7 @@ namespace RadioArchive
 
         public override string ToString()
         {
-            return $"AzureWebJobsStorage: {AzureWebJobsStorage}, AutoProcessStreamingLocator: {AutoProcessStreamingLocator}, AccountName: {AccountName}, ResourceGroup: {ResourceGroup},  SubscriptionId: {SubscriptionId}, AssetExpiryHours: {AssetExpiryHours}, AssetStorageAccountName: {AssetStorageAccountName}, DeleteJobs: {DeleteJobs}, StreamingTransformName: {StreamingTransformName}, AzureMediaServicesScope: {AzureMediaServicesScope}";
+            return $"AzureWebJobsStorage: {AzureWebJobsStorage}, AutoProcessStreamingLocator: {AutoProcessStreamingLocator}, MediaServicesAccountName: {MediaServicesAccountName}, ResourceGroup: {ResourceGroup},  SubscriptionId: {SubscriptionId}, ContainerSasExpiryHours: {ContainerSasExpiryHours}, AssetStorageAccountName: {AssetStorageAccountName}, DeleteJobs: {DeleteJobs}, StreamingTransformName: {StreamingTransformName}, AzureMediaServicesScope: {AzureMediaServicesScope}";
         }
     }
 }

@@ -197,7 +197,7 @@ namespace RadioArchive
             }
             catch (Exception ex)
             {
-                logger.LogWarning(ex, $"Could not fetch Transform. Details: client.Transforms.GetAsync({settings.ResourceGroup}, {settings.MediaServicesAccountName}, {settings.StreamingTransformName})");
+                logger.LogWarning(ex, $"[GetOrCreateTransformAsync] Could not fetch Transform. Details: client.Transforms.GetAsync({settings.ResourceGroup}, {settings.MediaServicesAccountName}, {settings.StreamingTransformName})");
             }
 
 
@@ -221,6 +221,8 @@ namespace RadioArchive
                         }
                     }
                 };
+
+                logger.LogInformation($"[GetOrCreateTransformAsync] output: {output}");
 
                 // Create the Transform with the output defined above
                 transform = await client.Transforms.CreateOrUpdateAsync(settings.ResourceGroup, settings.MediaServicesAccountName, settings.StreamingTransformName, output);

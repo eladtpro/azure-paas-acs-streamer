@@ -208,22 +208,7 @@ namespace RadioArchive
                 {
                     new TransformOutput
                     {
-                        Preset = new StandardEncoderPreset(
-                            codecs: new Codec[]{
-                                new CopyAudio(),
-                                new AacAudio {
-                                    Channels = 2,
-                                    SamplingRate = 48000,
-                                    Bitrate = 128000,
-                                    Profile = AacAudioProfile.AacLc,
-                                    Label = "aac-lc"
-                                }
-                            },
-                            formats: new Format[]{
-                                new Mp4Format(
-                                    filenamePattern: "{Basename}-{Label}-{Bitrate}.{Extension}")
-                            }
-                        )
+                        Preset = PresetFactory.Preset(PresetProfile.AacAudio)
                     }
                 };
 

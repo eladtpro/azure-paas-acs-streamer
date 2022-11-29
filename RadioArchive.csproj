@@ -32,6 +32,7 @@
     <None Remove="Microsoft.Rest.ClientRuntime.Azure.Authentication" />
     <None Remove="Microsoft.Azure.Storage.Blob" />
     <None Remove="Core\" />
+    <None Remove="Resources\" />
   </ItemGroup>
   <ItemGroup>
     <None Update="host.json">
@@ -40,10 +41,14 @@
     <None Update="local.settings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\AudioPlayerTemplate.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Interfaces\" />
     <Folder Include="Extensions\" />
     <Folder Include="Core\" />
+    <Folder Include="Resources\" />
   </ItemGroup>
 </Project>

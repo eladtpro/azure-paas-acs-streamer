@@ -1,0 +1,43 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Audio Player</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/0.5.14/hls.min.js" integrity="sha512-js37JxjD6gtmJ3N2Qzl9vQm4wcmTilFffk0nTSKzgr3p6aitg73LR205203wTzCCC/NZYO2TAxSa0Lr2VMLQvQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/0.5.14/hls.js" integrity="sha512-Uxb1LSW1XkMpEWsi4HguYGAHbXnNP5h0On1bBlSOZmEe42ajm2TCVy6khtfr5jFfjlToaG/mrN6R5zslmOCnAg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+        let text = document.getElementById("audio-url")
+        let audio = document.getElementById("hls-audio");
+        let source = "http://qthttp.apple.com.edgesuite.net/1010qwoeiuryfg/sl.m3u8"
+
+        if (!Hls.isSupported())
+            console.error("Hls is not supported (hls.js).")
+        {
+            console.log("hello hls.js!");
+
+            let hls = new Hls();
+            hls.attachMedia(audio);
+            hls.on(Hls.Events.MEDIA_ATTACHED, () => {
+                console.log("video and hls.js are now bound together !");
+                hls.loadSource(source);
+            });
+        }
+        audio.onplay = () => {
+            console.log("we can track events the same way with hls.js")
+        };
+
+        //text.onchange = 
+    </script>
+</head>
+<body>
+    <div>
+        <input type="text" id="audio-url" value="http://qthttp.apple.com.edgesuite.net/1010qwoeiuryfg/sl.m3u8" />
+        <input type="button" id="load-url">Load</input>
+    </div>
+    <div>
+        <audio controls id="hls-audio" preload="meta">
+            <source src="http://qthttp.apple.com.edgesuite.net/1010qwoeiuryfg/sl.m3u8" type="application/x-mpegURL" />
+        </audio>
+    </div>
+</body>
+</html>

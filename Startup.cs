@@ -44,7 +44,7 @@ namespace RadioArchive
                 settings.ContainerSasExpiryHours = 1;
 
             //config.GetSection(Settings.MediaSettings).Bind(settings);
-            Console.Write($"ISettings Configurations: {settings}");
+            //Console.Write($"ISettings Configurations: {settings}");
 
 
             builder.Services.AddTransient<IStreamingLocatorGenerator, StreamingLocatorGenerator>();

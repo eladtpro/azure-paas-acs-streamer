@@ -15,15 +15,19 @@
 
         [FunctionName("PrepareStreamingContent")]
         public async Task Run(
-        [BlobTrigger("data/{name}", Connection = "AzureInputStorage")] CloudBlockBlob blob, string name)
+        [BlobTrigger("data/{name}", Connection = "AzureInputStorage")] BlobClient blob, string name)
         {
+
             logger.LogInformation($"PrepareStreamingContent: C# Blob trigger function Processed blob\n Name:{name}");
             if (settings.AutoProcessStreamingLocator)
-                if (ContentType.Audio == blob.Properties.ContentType.ResolveType())
-                {
-                    using Stream stream = await blob.OpenReadAsync();
-                    await generator.Generate(new LocatorRequest(name, stream));
-                }
+                return;
+
+            BlobProperties props = await blob.GetPropertiesAsync();
+            if (ContentType.Audio == props.ContentType.ResolveType())
+            {
+                using Stream stream = await blob.OpenReadAsync();
+                await generator.Generate(new LocatorRequest(name, stream));
+            }
         }
     }
 }

@@ -21,6 +21,7 @@ namespace RadioArchive
             this.logger = logger;
         }
 
+        [Timeout("10:00:00")]
         [FunctionName("AudioStreamer")]
         public async Task<HttpResponseMessage> Run(
             [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest request,

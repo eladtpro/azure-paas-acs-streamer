@@ -220,7 +220,8 @@ namespace RadioArchive
                                 }
                             },
                             formats: new Format[]{
-                                new Mp4Format()
+                                new Mp4Format(
+                                    filenamePattern: "{Basename}-{Label}-{Bitrate}.{Extension}")
                             }
                         )
                     }

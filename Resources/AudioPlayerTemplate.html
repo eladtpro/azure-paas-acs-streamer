@@ -12,7 +12,7 @@
         if (!Hls.isSupported())
             console.error("Hls is not supported (hls.js).");
         console.log("Hls loaded (hls.js)");
-        let hls = null;
+        
 
         async function fetchHlsUrl() {
             console.log("fetchHls clicked");
@@ -23,7 +23,7 @@
             return fetch(url)
                 .then((response) => response.json())
                 .then((data) => {
-                    console.log(`[fetchHlsUrl] data: ${data}`);
+                    console.log(`[fetchHlsUrl] data: ${response.json()}`);
                     const dataUrl = Object.values(data).find(e => e.streamingProtocol === "Hls").paths[0];
                     console.log(`[fetchHlsUrl] dataUrl: ${dataUrl}`);
                     attachSource(dataUrl);
@@ -34,13 +34,8 @@
         }
 
         const attachSource = (source) => {
-            if(hls){
-                hls.loadSource(source);
-                return;
-            }
-
-            let hlsAudio = $("#hlsAudio").get();
-            hls = new Hls();
+            const hlsAudio = $("#hlsAudio").get();
+            const hls = new Hls();
             hls.attachMedia(hlsAudio);
             hls.on(Hls.Events.MEDIA_ATTACHED, () => {
                 console.log("Audio and hls.js are now bound together !");

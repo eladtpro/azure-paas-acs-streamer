@@ -12,7 +12,7 @@
         if (!Hls.isSupported())
             console.error("Hls is not supported (hls.js).");
         console.log("Hls loaded (hls.js)");
-        const hls = null;
+        let hls = null;
 
         async function fetchHlsUrl() {
             console.log("fetchHls clicked");
@@ -64,7 +64,7 @@
 </head>
 
 <body>
-    <div>
+    <div class="container-fluid">
         <div class="mb-3">
             <input type="text" class="form-control" id="blobName" aria-describedby="blobNameHelp"
                 placeholder="Blob Name" value="Led Zeppelin - Stairway To Heaven (Official Audio).mp3">

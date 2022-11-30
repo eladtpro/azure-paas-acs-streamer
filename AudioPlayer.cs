@@ -9,13 +9,15 @@ namespace RadioArchive
 	{
         [FunctionName("AudioPlayer")]
         public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Function, "get",
-            Route = "hello_html")]
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get")]
             HttpRequest req,
-            ILogger log)
+            ExecutionContext context,
+            ILogger logger)
         {
-            string html = await File.ReadAllTextAsync("AudioPlayerTemplate.html");
-            return new ContentResult { Content = "<html><body>Hello <b>world</b></body></html>", ContentType = "text/html" };
+            string path = Path.Combine(context.FunctionAppDirectory, "Resources", "AudioPlayerTemplate.html");
+            logger.LogInformation($"[AudioPlayer] path: {path}, exists: {File.Exists(path)}");
+            string html = await File.ReadAllTextAsync(path);
+            return new ContentResult { Content = html, ContentType = "text/html" };
         }
     }
 }

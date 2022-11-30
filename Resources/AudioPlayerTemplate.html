@@ -14,8 +14,6 @@
         console.log("Hls loaded (hls.js)");
         const hls = null;
 
-        let globalForDelete = null;
-
         async function fetchHlsUrl() {
             console.log("fetchHls clicked");
             const funcUrl = $("#funcUrl").val();
@@ -25,11 +23,11 @@
             fetch(url)
                 .then((response) => response.json())
                 .then((data) => {
-                    globalForDelete = data;
-                    console.log(data);
-                    console.log(data[0].paths[0]);
-                    attachSource(data.url);
-                    $("#hlsSource").val(data.url);
+                    console.log(`[fetchHlsUrl] data: ${data}`);
+                    const dataUrl = Object.values(data).find(e => e.streamingProtocol === "Hls").paths[0];
+                    console.log(`[fetchHlsUrl] dataUrl: ${dataUrl}`);
+                    attachSource(dataUrl);
+                    $("#hlsSource").val(dataUrl);
                     $("#loadUrl").prop('disabled', true);
                     $("#hlsAudio").play();
                 });

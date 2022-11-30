@@ -1,14 +1,6 @@
-﻿using Microsoft.Azure.Management.Media.Models;
-using Microsoft.Azure.Management.Media;
-using Microsoft.Rest;
-using Microsoft.Rest.Azure;
-using Microsoft.Rest.Azure.OData;
-using Azure.Identity;
-using Azure.Core;
-
-namespace RadioArchive
+﻿namespace RadioArchive
 {
-    public class StreamingLocatorGenerator : IStreamingLocatorGenerator
+    public class StreamingLocatorGenerator
     {
         private readonly ISettings settings;
         private readonly ILogger<StreamingLocatorGenerator> logger;
@@ -19,11 +11,16 @@ namespace RadioArchive
             this.logger = logger;
         }
 
-        public async Task<IDictionary<string, StreamingPath>> Generate(LocatorRequest request)
+        [FunctionName(nameof(StreamingLocatorGenerator))]
+        public async Task<IDictionary<string, StreamingPath>> Run(
+            [OrchestrationTrigger] IDurableOrchestrationContext context,
+            [Blob(LocatorContext.ContainerName, Connection = "AzureInputStorage")] BlobContainerClient containerClient)
         {
-            string name = request.Name.Sanitize();
+            LocatorContext request = context.GetInput<LocatorContext>();
+            string name = request.Name;
             try
             {
+                request = await context.CallActivityAsync<LocatorContext>(nameof(Tokenizer), request);
                 logger.LogInformation($"[StreamingLocatorGenerator.Generate] CreateMediaServicesClientAsync {request}");
                 IAzureMediaServicesClient client = await CreateMediaServicesClientAsync();
                 logger.LogInformation($"GetStreamLocator name:{name}");
@@ -31,7 +28,7 @@ namespace RadioArchive
                 if (null == locator)
                 {
                     logger.LogInformation($"[StreamingLocatorGenerator.Generate] CreateInputAssetAsync name:{name}.input");
-                    Asset input = await CreateInputAssetAsync(client, $"{name}.input", request.Blob);
+                    Asset input = await CreateInputAssetAsync(client, $"{name}.input", containerClient, request);
                     logger.LogInformation($"[StreamingLocatorGenerator.Generate] CreateOutputAssetAsync name:{name}.output");
                     Asset output = await CreateOutputAssetAsync(client, $"{name}.output");
                     logger.LogInformation($"[StreamingLocatorGenerator.Generate] GetOrCreateTransformAsync");
@@ -39,7 +36,7 @@ namespace RadioArchive
                     logger.LogInformation($"[StreamingLocatorGenerator.Generate] SubmitJobAsync name: {name}");
                     Job job = await SubmitJobAsync(client, name, input, output);
                     logger.LogInformation($"[StreamingLocatorGenerator.Generate] WaitForJobToFinishAsync job: {job.Name}");
-                    await WaitForJobToFinishAsync(job);
+                    await WaitForJobToFinishAsync(job, context);
                     logger.LogInformation($"[StreamingLocatorGenerator.Generate] CreateStreamingLocatorAsync name: {name}");
                     locator = await CreateStreamingLocatorAsync(client, output, name);
                     logger.LogInformation($"[StreamingLocatorGenerator.Generate] CleanUp name: {name}");
@@ -136,16 +133,21 @@ namespace RadioArchive
             return locator;
         }
 
-        private async Task WaitForJobToFinishAsync(Job job)
+        private async Task WaitForJobToFinishAsync(Job job, IDurableOrchestrationContext context)
         {
-            const int SleepIntervalMs = 500;
+            
+            // const int SleepIntervalMs = 500;
             JobOutput jobOutput = job.Outputs.First(); //should be only one output
             do
             {
                 if (JobState.Processing == jobOutput.State)
-                    Console.Write($"\r{job.Name} - {jobOutput.State} {jobOutput.Progress}%");
+                {
+                    string message = $"\r{job.Name} - {jobOutput.State} {jobOutput.Progress}%";
+                    await context.CallActivityAsync<Task>(nameof(Notify), $"Processing: \r{job.Name} - {jobOutput.State} {jobOutput.Progress}%");
+                    Console.Write(message);
+                }
                 else if (JobState.Scheduled == job.State || JobState.Queued == job.State)
-                    await Task.Delay(SleepIntervalMs);
+                    await context.CallActivityAsync<Task>(nameof(Notify), $"Waiting: \r{job.Name} - {jobOutput.State} {jobOutput.Progress}%");
                 else
                     break;
             }
@@ -230,28 +232,18 @@ namespace RadioArchive
             return await client.Assets.CreateOrUpdateAsync(settings.ResourceGroup, settings.MediaServicesAccountName, assetName, parameters);
         }
 
-        private async Task<Asset> CreateInputAssetAsync(IAzureMediaServicesClient client, string assetName, Stream blob)
+        private async Task<Asset> CreateInputAssetAsync(IAzureMediaServicesClient client, string assetName, BlobContainerClient sourceContainerClient, LocatorContext request)
         {
+            MemoryStream blob = new MemoryStream();
+            await sourceContainerClient.GetBlobClient(request.OriginalName).DownloadToAsync(blob);;
             Asset parameters = new Asset
             {
                 StorageAccountName = settings.AssetStorageAccountName
-
             };
             Asset asset = await client.Assets.CreateOrUpdateAsync(settings.ResourceGroup, settings.MediaServicesAccountName, assetName, parameters);
-            Console.WriteLine($"Input Asset created {asset.Name}, modified: {asset.LastModified}");
-
-
-            AssetContainerSas response = await client.Assets.ListContainerSasAsync(
-                settings.ResourceGroup,
-                settings.MediaServicesAccountName,
-                asset.Name,
-                permissions: AssetContainerPermission.ReadWrite,
-                expiryTime: DateTime.UtcNow.AddHours(settings.ContainerSasExpiryHours).ToUniversalTime());
-
-            Uri sasUri = new Uri(response.AssetContainerSasUrls.First());
-            Console.WriteLine(sasUri);
-            BlobContainerClient container = new BlobContainerClient(sasUri);
-            BlobClient amsBlob = container.GetBlobClient(asset.Name);
+            Console.WriteLine($"Input Asset created {asset.Name}, modified: {asset.LastModified}, sasUri: {request.SasUri}");
+            BlobContainerClient targetContainerClient = new BlobContainerClient(request.SasUri);
+            BlobClient amsBlob = targetContainerClient.GetBlobClient(asset.Name);
 
             //Initialize a progress handler. When the file is being uploaded, the current uploaded bytes will be published back to us using this progress handler by the Blob Storage Service
             long length = blob.Length;

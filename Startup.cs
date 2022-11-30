@@ -47,7 +47,6 @@ namespace RadioArchive
             //Console.Write($"ISettings Configurations: {settings}");
 
 
-            builder.Services.AddTransient<IStreamingLocatorGenerator, StreamingLocatorGenerator>();
             builder.Services.AddSingleton<ISettings>(settings);
             builder.Services.AddSingleton<IConfiguration>(config);
         }

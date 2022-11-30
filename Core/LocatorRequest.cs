@@ -1,21 +1,24 @@
 ﻿namespace RadioArchive
 {
-	public class LocatorRequest
+	public class LocatorContext
 	{
+		public const string ContainerName = "data";
+        public string OriginalName { get; private set; }
         public string Name { get; set; }
-		public Stream Blob { get; set; }
-		public TimeSpan? start { get; set; } = null;
-		public TimeSpan? end { get; set; } = null;
+		public IDictionary<string, StreamingPath> urls { get; set; }
+		public BlobProperties Properties { get; set; }
+		public Uri SasUri { get; set; }
 
-		public LocatorRequest(string name, Stream blob)
+		public LocatorContext(string name, BlobProperties props)
 		{
-			Name = name;
-			Blob = blob;
+			OriginalName = name;
+            Name = name.Sanitize();
+			Properties = props;
         }
 
 		override public string ToString()
 		{
-			return $"LocatorRequest: {Name}, {Blob.Length}, {start}, {end}";
+			return $"LocatorContext: {Name}, {Properties}";
 		}
 	}
 }

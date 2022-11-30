@@ -4,7 +4,7 @@ namespace RadioArchive
 {
     public interface IStreamingLocatorGenerator
     {
-        Task<IDictionary<string, StreamingPath>> Generate(LocatorRequest request);
+        Task<IDictionary<string, StreamingPath>> Generate(LocatorContext request);
     }
 }
 

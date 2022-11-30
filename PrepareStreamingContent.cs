@@ -13,11 +13,11 @@
             this.logger = logger;
         }
 
-        [FunctionName("PrepareStreamingContent")]
+        [FunctionName(nameof(PrepareStreamingContent))]
         public async Task Run(
-        [BlobTrigger("data/{name}", Connection = "AzureInputStorage")] BlobClient blob, string name)
+        [BlobTrigger("data/{name}", Connection = "AzureInputStorage")] BlobClient blob, string name,
+        [DurableClient] IDurableOrchestrationClient starter)
         {
-
             logger.LogInformation($"PrepareStreamingContent: C# Blob trigger function Processed blob\n Name:{name}");
             if (settings.AutoProcessStreamingLocator)
                 return;
@@ -25,8 +25,8 @@
             BlobProperties props = await blob.GetPropertiesAsync();
             if (ContentType.Audio == props.ContentType.ResolveType())
             {
-                using Stream stream = await blob.OpenReadAsync();
-                await generator.Generate(new LocatorRequest(name, stream));
+                LocatorContext locator = new LocatorContext(name, props);
+                await starter.StartNewAsync<LocatorContext>(nameof(StreamingLocatorGenerator), locator);
             }
         }
     }

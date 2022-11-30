@@ -20,7 +20,7 @@
             const name = $("#blobName").val();
             const url = `${funcUrl}&name=${name}`;
             console.log(`[fetchHlsUrl] Fetching url: ${url}`);
-            fetch(url)
+            return fetch(url)
                 .then((response) => response.json())
                 .then((data) => {
                     console.log(`[fetchHlsUrl] data: ${data}`);
@@ -29,9 +29,8 @@
                     attachSource(dataUrl);
                     $("#hlsSource").val(dataUrl);
                     $("#loadUrl").prop('disabled', true);
-                    $("#hlsAudio").play();
+                    // $("#hlsAudio").play();
                 });
-            return data.hlsUrl;
         }
 
         const attachSource = (source) => {

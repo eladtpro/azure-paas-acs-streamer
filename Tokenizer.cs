@@ -3,27 +3,28 @@ namespace RadioArchive
     public class Tokenizer
     {
         [FunctionName(nameof(Tokenizer))]
-        public async Task<LocatorContext> Run(
-        [ActivityTrigger] LocatorContext locator,
-        ISettings settings,
-        ILogger logger)
+        public static async Task<LocatorContext> Run(
+        [ActivityTrigger] LocatorContext request,
+        ILogger<Tokenizer> logger,
+        IOptions<Settings> options)
         {
-            logger.LogInformation($"[Tokenizer] C# ActivityTrigger trigger function Processed locator:{locator}");
+            Settings settings = options.Value;
+            logger.LogInformation($"[Tokenizer] C# ActivityTrigger trigger function Processed locator:{request}");
             IAzureMediaServicesClient client = await CreateMediaServicesClientAsync(settings, logger);
             AssetContainerSas response = await client.Assets.ListContainerSasAsync(
                 settings.ResourceGroup,
                 settings.MediaServicesAccountName,
-                $"{locator.Name}.input",
+                $"{request.Name}.input",
                 permissions: AssetContainerPermission.ReadWrite,
-                expiryTime: DateTime.UtcNow.AddHours(settings.ContainerSasExpiryHours).ToUniversalTime());
-            locator.SasUri =  new Uri(response.AssetContainerSasUrls.First());
+                expiryTime: request.Created.AddHours(settings.ContainerSasExpiryHours).ToUniversalTime());
+            request.SasUri =  new Uri(response.AssetContainerSasUrls.First());
 
-            return locator;
+            return request;
         }
 
-        private async Task<IAzureMediaServicesClient> CreateMediaServicesClientAsync(
-            ISettings settings,
-            ILogger logger)
+        private static async Task<IAzureMediaServicesClient> CreateMediaServicesClientAsync(
+            Settings settings,
+            ILogger<Tokenizer> logger)
         {
             //var credentials = await GetCredentialsAsync(config);
             logger.LogInformation($"CreateMediaServicesClientAsync trying to get token");

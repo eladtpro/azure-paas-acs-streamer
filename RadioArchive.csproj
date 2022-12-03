@@ -4,23 +4,24 @@
     <AzureFunctionsVersion>v4</AzureFunctionsVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <PublishReadyToRun>true</PublishReadyToRun>
+    <PublishReadyToRun>false</PublishReadyToRun>
   </PropertyGroup>
   <PropertyGroup>
-    <PublishTrimmed>true</PublishTrimmed>
+    <PublishTrimmed>false</PublishTrimmed>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="4.0.1" />
-    <PackageReference Include="Microsoft.Azure.Management.Media" Version="6.0.0" />
-    <PackageReference Include="Azure.Storage.Blobs" Version="12.14.1" />
+    <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="4.1.3" />
     <PackageReference Include="Microsoft.ApplicationInsights.WorkerService" Version="2.21.0" />
-    <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Storage" Version="5.0.1" />
     <PackageReference Include="AzureFunctions.Extensions.DependencyInjection" Version="1.1.3" />
-    <PackageReference Include="Microsoft.Azure.Functions.Extensions" Version="1.1.0" />
     <PackageReference Include="Microsoft.Rest.ClientRuntime.Azure.Authentication" Version="2.4.1" />
     <PackageReference Include="Azure.Identity" Version="1.7.0" />
+    <PackageReference Include="Azure.Storage.Blobs" Version="12.14.1" />
+    <PackageReference Include="Microsoft.Azure.Management.Media" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Azure.Functions.Extensions" Version="1.1.0" />
+    <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Storage" Version="5.0.1" />
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.SignalRService" Version="1.8.0" />
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.DurableTask" Version="2.7.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="Microsoft.Azure.Management.Media" />

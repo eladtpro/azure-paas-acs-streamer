@@ -5,6 +5,7 @@
 		public const string ContainerName = "data";
         public string OriginalName { get; private set; }
         public string Name { get; set; }
+		public DateTime Created { get; set; }
 		public IDictionary<string, StreamingPath> urls { get; set; }
 		public BlobProperties Properties { get; set; }
 		public Uri SasUri { get; set; }

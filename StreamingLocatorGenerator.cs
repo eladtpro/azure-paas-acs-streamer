@@ -2,21 +2,22 @@
 {
     public class StreamingLocatorGenerator
     {
-        private readonly ISettings settings;
+        private readonly Settings settings;
         private readonly ILogger<StreamingLocatorGenerator> logger;
 
-        public StreamingLocatorGenerator(ISettings settings, ILogger<StreamingLocatorGenerator> logger)
+        public StreamingLocatorGenerator(IOptions<Settings> options, ILogger<StreamingLocatorGenerator> logger)
         {
-            this.settings = settings;
+            this.settings = options.Value;
             this.logger = logger;
         }
 
         [FunctionName(nameof(StreamingLocatorGenerator))]
         public async Task<IDictionary<string, StreamingPath>> Run(
-            [OrchestrationTrigger] IDurableOrchestrationContext context,
-            [Blob(LocatorContext.ContainerName, Connection = "AzureInputStorage")] BlobContainerClient containerClient)
+            [OrchestrationTrigger] IDurableOrchestrationContext context)
         {
             LocatorContext request = context.GetInput<LocatorContext>();
+            request.Created = context.CurrentUtcDateTime;
+            
             string name = request.Name;
             try
             {
@@ -27,22 +28,14 @@
                 StreamingLocator locator = await GetStreamLocator(client, name);
                 if (null == locator)
                 {
-                    logger.LogInformation($"[StreamingLocatorGenerator.Generate] CreateInputAssetAsync name:{name}.input");
-                    Asset input = await CreateInputAssetAsync(client, $"{name}.input", containerClient, request);
-                    logger.LogInformation($"[StreamingLocatorGenerator.Generate] CreateOutputAssetAsync name:{name}.output");
+                    Asset input = await CreateInputAssetAsync(client, $"{name}.input", request);
                     Asset output = await CreateOutputAssetAsync(client, $"{name}.output");
-                    logger.LogInformation($"[StreamingLocatorGenerator.Generate] GetOrCreateTransformAsync");
                     Transform transform = await GetOrCreateTransformAsync(client);
-                    logger.LogInformation($"[StreamingLocatorGenerator.Generate] SubmitJobAsync name: {name}");
                     Job job = await SubmitJobAsync(client, name, input, output);
-                    logger.LogInformation($"[StreamingLocatorGenerator.Generate] WaitForJobToFinishAsync job: {job.Name}");
                     await WaitForJobToFinishAsync(job, context);
-                    logger.LogInformation($"[StreamingLocatorGenerator.Generate] CreateStreamingLocatorAsync name: {name}");
                     locator = await CreateStreamingLocatorAsync(client, output, name);
-                    logger.LogInformation($"[StreamingLocatorGenerator.Generate] CleanUp name: {name}");
                     await CleanUp(client, input, job);
                 }
-                logger.LogInformation($"[StreamingLocatorGenerator.Generate] GetStreamingUrlsAsync locator:{locator}");
                 logger.LogInformation($"[StreamingLocatorGenerator.Generate] Success locator:{locator}, request:{request}");
                 return await GetStreamingUrlsAsync(client, locator);
             }
@@ -70,6 +63,7 @@
 
         private async Task CleanUp(IAzureMediaServicesClient client, Asset input, Job job)
         {
+            logger.LogInformation($"[StreamingLocatorGenerator.Generate] CleanUp job: {job.Name}");
             try
             {
                 await client.Assets.DeleteAsync(settings.ResourceGroup, settings.MediaServicesAccountName, input.Name);
@@ -85,6 +79,8 @@
 
         private async Task<IDictionary<string, StreamingPath>> GetStreamingUrlsAsync(IAzureMediaServicesClient client, StreamingLocator locator)
         {
+            logger.LogInformation($"[StreamingLocatorGenerator.Generate] GetStreamingUrlsAsync locator:{locator}");
+
             IDictionary<string, StreamingPath> streamingUrls = new Dictionary<string, StreamingPath>();
 
             StreamingEndpoint streamingEndpoint = await client.StreamingEndpoints.GetAsync(settings.ResourceGroup, settings.MediaServicesAccountName, settings.DefaultStreamingEndpointName);
@@ -115,6 +111,7 @@
 
         private async Task<StreamingLocator> CreateStreamingLocatorAsync(IAzureMediaServicesClient client, Asset output, string name)
         {
+            logger.LogInformation($"[StreamingLocatorGenerator.Generate] CreateStreamingLocatorAsync name: {name}");
             ODataQuery<StreamingLocator> query = new ODataQuery<StreamingLocator>((loc) => loc.Name == name);
             IPage<StreamingLocator> locators = await client.StreamingLocators.ListAsync(settings.ResourceGroup, settings.MediaServicesAccountName, query);
 
@@ -135,6 +132,7 @@
 
         private async Task WaitForJobToFinishAsync(Job job, IDurableOrchestrationContext context)
         {
+            logger.LogInformation($"[StreamingLocatorGenerator.Generate] WaitForJobToFinishAsync job: {job.Name}");
             
             // const int SleepIntervalMs = 500;
             JobOutput jobOutput = job.Outputs.First(); //should be only one output
@@ -162,6 +160,7 @@
 
         private async Task<Job> SubmitJobAsync(IAzureMediaServicesClient client, string jobName, Asset input, Asset output, TimeSpan? start = null, TimeSpan? end = null)
         {
+            logger.LogInformation($"[StreamingLocatorGenerator.Generate] SubmitJobAsync jobName: {jobName}");
             ODataQuery<Job> query = new ODataQuery<Job>(j => j.Name == jobName);
             IPage<Job> jobs = await client.Jobs.ListAsync(settings.ResourceGroup, settings.MediaServicesAccountName, settings.StreamingTransformName, query);
             Job job = jobs.FirstOrDefault();
@@ -189,6 +188,8 @@
 
         private async Task<Transform> GetOrCreateTransformAsync(IAzureMediaServicesClient client)
         {
+            logger.LogInformation($"[GetOrCreateTransformAsync]");
+
             // Does a Transform already exist with the desired name? Assume that an existing Transform with the desired name
             // also uses the same recipe or Preset for processing content.
             Transform transform = null;
@@ -225,6 +226,7 @@
 
         private async Task<Asset> CreateOutputAssetAsync(IAzureMediaServicesClient client, string assetName)
         {
+            logger.LogInformation($"[CreateOutputAssetAsync] assetName:{assetName}.output");
             Asset parameters = new Asset
             {
                 StorageAccountName = settings.AssetStorageAccountName
@@ -232,10 +234,13 @@
             return await client.Assets.CreateOrUpdateAsync(settings.ResourceGroup, settings.MediaServicesAccountName, assetName, parameters);
         }
 
-        private async Task<Asset> CreateInputAssetAsync(IAzureMediaServicesClient client, string assetName, BlobContainerClient sourceContainerClient, LocatorContext request)
+        private async Task<Asset> CreateInputAssetAsync(IAzureMediaServicesClient client, string assetName, LocatorContext request)
         {
+            logger.LogInformation($"[CreateInputAssetAsync] assetName:{assetName}");
+            BlobContainerClient sourceContainerClient = new BlobContainerClient(settings.AzureInputStorage, LocatorContext.ContainerName);
             MemoryStream blob = new MemoryStream();
             await sourceContainerClient.GetBlobClient(request.OriginalName).DownloadToAsync(blob);;
+            // BlobClient blobClient = sourceContainerClient.GetBlobClient(request.OriginalName);
             Asset parameters = new Asset
             {
                 StorageAccountName = settings.AssetStorageAccountName
@@ -283,8 +288,7 @@
                 new TokenRequestContext(
                     scopes: new string[] {
                         settings.AzureMediaServicesScope
-                        // "https://management.core.windows.net" + "/.default",
-                        //"Microsoft.Media/mediaServices" + "/.default"
+                        // "https://management.core.windows.net/.default"
                         }
                     )
                 );

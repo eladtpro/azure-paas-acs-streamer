@@ -15,6 +15,12 @@ global using Azure.Core;
 global using Microsoft.Rest;
 global using Microsoft.Rest.Azure;
 global using Microsoft.Rest.Azure.OData;
+global using Microsoft.Azure.Functions.Extensions.DependencyInjection;
+global using Microsoft.Azure.WebJobs.Host.Bindings;
+global using Microsoft.Extensions.Configuration;
+global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.Extensions.Options;
+
 
 
 

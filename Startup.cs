@@ -1,55 +1,34 @@
-﻿using Microsoft.Azure.Functions.Extensions.DependencyInjection;
-using Microsoft.Azure.WebJobs.Host.Bindings;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-
-[assembly: FunctionsStartup(typeof(RadioArchive.Startup))]
+﻿[assembly: FunctionsStartup(typeof(RadioArchive.Startup))]
 
 namespace RadioArchive
 {
     public class Startup : FunctionsStartup
     {
-        public override void Configure(IFunctionsHostBuilder builder)
+        public override void ConfigureAppConfiguration(IFunctionsConfigurationBuilder builder)
         {
-            ExecutionContextOptions options = builder.Services.BuildServiceProvider()
-                .GetService<IOptions<ExecutionContextOptions>>().Value;
+            FunctionsHostBuilderContext context = builder.GetContext();
 
-            IConfigurationRoot config = new ConfigurationBuilder()
-                .SetBasePath(options.AppDirectory)
-                .AddJsonFile("local.settings.json", optional: true, reloadOnChange: true)
+            var config = builder.ConfigurationBuilder
+                .SetBasePath(context.ApplicationRootPath)
+                .AddJsonFile(Path.Combine(context.ApplicationRootPath, "local.settings.json"), optional: true, reloadOnChange: true)
+                .AddJsonFile(Path.Combine(context.ApplicationRootPath, "appsettings.json"), optional: true, reloadOnChange: false)
+                .AddJsonFile(Path.Combine(context.ApplicationRootPath, $"appsettings.{context.EnvironmentName}.json"), optional: true, reloadOnChange: false)
                 .AddEnvironmentVariables()
                 .Build();
-
-            ISettings settings = new Settings
-            {
-                AzureWebJobsStorage = Environment.GetEnvironmentVariable("AzureWebJobsStorage", EnvironmentVariableTarget.Process),
-                MediaServicesAccountName = Environment.GetEnvironmentVariable("MediaServicesAccountName", EnvironmentVariableTarget.Process),
-                ResourceGroup = Environment.GetEnvironmentVariable("ResourceGroup", EnvironmentVariableTarget.Process),
-                SubscriptionId = Environment.GetEnvironmentVariable("SubscriptionId", EnvironmentVariableTarget.Process),
-                DefaultStreamingEndpointName = Environment.GetEnvironmentVariable("DefaultStreamingEndpointName", EnvironmentVariableTarget.Process),
-                StreamingLocatorScheme = Environment.GetEnvironmentVariable("StreamingLocatorScheme", EnvironmentVariableTarget.Process),
-                AssetStorageAccountName = Environment.GetEnvironmentVariable("AssetStorageAccountName", EnvironmentVariableTarget.Process),
-                StreamingTransformName = Environment.GetEnvironmentVariable("StreamingTransformName", EnvironmentVariableTarget.Process),
-                AzureMediaServicesScope = Environment.GetEnvironmentVariable("AzureMediaServicesScope", EnvironmentVariableTarget.Process)
-            };
-
-            if (bool.TryParse(Environment.GetEnvironmentVariable("AutoProcessStreamingLocator", EnvironmentVariableTarget.Process), out bool autoLocator))
-                settings.AutoProcessStreamingLocator = autoLocator;
-            if (bool.TryParse(Environment.GetEnvironmentVariable("DeleteJobs", EnvironmentVariableTarget.Process), out bool delJobs))
-                settings.DeleteJobs = delJobs;
-            if (int.TryParse(Environment.GetEnvironmentVariable("ContainerSasExpiryHours", EnvironmentVariableTarget.Process), out int expiry))
-                settings.ContainerSasExpiryHours = expiry;
-            else
-                settings.ContainerSasExpiryHours = 1;
-
-            //config.GetSection(Settings.MediaSettings).Bind(settings);
-            //Console.Write($"ISettings Configurations: {settings}");
-
-
-            builder.Services.AddSingleton<ISettings>(settings);
-            builder.Services.AddSingleton<IConfiguration>(config);
         }
+
+        public override void Configure(IFunctionsHostBuilder builder)
+        {
+            builder.Services.AddOptions<Settings>()
+                .Configure<IConfiguration>((settings, configuration) =>
+                {
+                    configuration.GetSection(Settings.Section).Bind(settings);
+                    System.Console.WriteLine($"Settings: {settings}");
+                });
+
+            //var config = builder.GetContext().Configuration;
+            //builder.Services.Configure<Settings>(config.GetSection(Settings.Section));
+        }
+
     }
 }
-

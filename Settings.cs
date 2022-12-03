@@ -1,16 +1,15 @@
-﻿using System;
-namespace RadioArchive
+﻿namespace RadioArchive
 {
-    public class Settings : ISettings
+    public class Settings
     {
-        public const string MediaSettings = "Values";
+        public const string Section = nameof(Settings);
 
-        public string   AzureWebJobsStorage             { get; set; }
+        public string   AzureInputStorage               { get; set; }
         public bool     AutoProcessStreamingLocator     { get; set; }
         public string   MediaServicesAccountName        { get; set; }
         public string   ResourceGroup                   { get; set; }
         public string   SubscriptionId                  { get; set; }
-        public double   ContainerSasExpiryHours                { get; set; }
+        public double   ContainerSasExpiryHours         { get; set; }
         public string   DefaultStreamingEndpointName    { get; set; }
         public string   StreamingLocatorScheme          { get; set; }
         public string   AssetStorageAccountName         { get; set; }
@@ -20,7 +19,7 @@ namespace RadioArchive
 
         public override string ToString()
         {
-            return $"AzureWebJobsStorage: {AzureWebJobsStorage}, AutoProcessStreamingLocator: {AutoProcessStreamingLocator}, MediaServicesAccountName: {MediaServicesAccountName}, ResourceGroup: {ResourceGroup},  SubscriptionId: {SubscriptionId}, ContainerSasExpiryHours: {ContainerSasExpiryHours}, AssetStorageAccountName: {AssetStorageAccountName}, DeleteJobs: {DeleteJobs}, StreamingTransformName: {StreamingTransformName}, AzureMediaServicesScope: {AzureMediaServicesScope}";
+            return $"AutoProcessStreamingLocator: {AutoProcessStreamingLocator}, MediaServicesAccountName: {MediaServicesAccountName}, ResourceGroup: {ResourceGroup},  SubscriptionId: {SubscriptionId}, ContainerSasExpiryHours: {ContainerSasExpiryHours}, AssetStorageAccountName: {AssetStorageAccountName}, DeleteJobs: {DeleteJobs}, StreamingTransformName: {StreamingTransformName}, AzureMediaServicesScope: {AzureMediaServicesScope}";
         }
     }
 }

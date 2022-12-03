@@ -13,7 +13,7 @@
         [Timeout("10:00:00")]
         [FunctionName("AudioStreamer")]
         public async Task<HttpResponseMessage> Run(
-            [HttpTrigger(AuthorizationLevel.Function, "get", Route = null)] HttpRequest request,
+            [HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequest request,
             [Blob("data/{Query.name}", FileAccess.Read, Connection = "Settings:AzureInputStorage")] BlobClient blob,
             [DurableClient] IDurableOrchestrationClient starter,
             [SignalR(HubName = "sr-backend-chunnel")] IAsyncCollector<SignalRMessage> signalRMessages)

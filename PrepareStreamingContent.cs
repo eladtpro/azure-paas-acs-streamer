@@ -12,7 +12,7 @@
 
         [FunctionName(nameof(PrepareStreamingContent))]
         public async Task Run(
-        [BlobTrigger("data/{name}", Connection = "Settings__AzureInputStorage")] BlobClient blob, string name,
+        [BlobTrigger("data/{name}", Connection = "AzureInputStorage")] BlobClient blob, string name,
         [DurableClient] IDurableOrchestrationClient starter)
         {
             logger.LogInformation($"PrepareStreamingContent: C# Blob trigger function Processed blob\n Name:{name}");

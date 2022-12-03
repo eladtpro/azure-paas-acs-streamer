@@ -4,10 +4,10 @@
     <AzureFunctionsVersion>v4</AzureFunctionsVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <PublishReadyToRun>false</PublishReadyToRun>
+    <PublishReadyToRun>true</PublishReadyToRun>
   </PropertyGroup>
   <PropertyGroup>
-    <PublishTrimmed>false</PublishTrimmed>
+    <PublishTrimmed>true</PublishTrimmed>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="4.1.3" />

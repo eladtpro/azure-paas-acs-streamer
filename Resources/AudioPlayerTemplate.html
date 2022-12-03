@@ -16,7 +16,10 @@
         console.log("Hls loaded (hls.js)");
 
         const connection = new signalR.HubConnectionBuilder()
-            .withUrl("https://sr-backend-chunnel.service.signalr.net")
+            .withUrl("https://sr-backend-chunnel.service.signalr.net", {
+                skipNegotiation: true,
+                transport: signalR.HttpTransportType.WebSockets
+            })
             .configureLogging(signalR.LogLevel.Information)
             .build();
 

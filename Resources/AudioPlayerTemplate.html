@@ -20,6 +20,7 @@
                 skipNegotiation: true,
                 transport: signalR.HttpTransportType.WebSockets
             })
+            .withAutomaticReconnect()
             .configureLogging(signalR.LogLevel.Information)
             .build();
 
@@ -46,9 +47,19 @@
             }
         };
 
-        connection.onclose(async () => {
-            await start();
+        connection.onreconnecting(error => {
+            console.assert(connection.state === signalR.HubConnectionState.Reconnecting);
+            $(".alert")
+                .prop("class", "alert alert-danger")
+                .html("Connection lost due to error \"" + error + "\". Reconnecting.")
+                .alert();
+
+            // $("#fetchHls").prop('disabled', true);
         });
+
+        // connection.onclose(async () => {
+        //     await start();
+        // });
 
         async function fetchHlsUrl() {
             console.log("fetchHls clicked");

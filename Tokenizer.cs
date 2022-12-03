@@ -2,15 +2,20 @@ namespace RadioArchive
 {
     public class Tokenizer
     {
-        [FunctionName(nameof(Tokenizer))]
-        public static async Task<LocatorContext> Run(
-        [ActivityTrigger] LocatorContext request,
-        ILogger<Tokenizer> logger,
-        IOptions<Settings> options)
+        private readonly Settings settings;
+        private readonly ILogger logger;
+        public Tokenizer(IOptions<Settings> options, ILogger<Tokenizer> logger)
         {
-            Settings settings = options.Value;
+            settings = options.Value;
+            this.logger = logger;
+        }
+
+        [FunctionName(nameof(Tokenizer))]
+        public async Task<LocatorContext> Run(
+        [ActivityTrigger] LocatorContext request)
+        {
             logger.LogInformation($"[Tokenizer] C# ActivityTrigger trigger function Processed locator:{request}");
-            IAzureMediaServicesClient client = await CreateMediaServicesClientAsync(settings, logger);
+            IAzureMediaServicesClient client = await CreateMediaServicesClientAsync();
             AssetContainerSas response = await client.Assets.ListContainerSasAsync(
                 settings.ResourceGroup,
                 settings.MediaServicesAccountName,
@@ -22,9 +27,7 @@ namespace RadioArchive
             return request;
         }
 
-        private static async Task<IAzureMediaServicesClient> CreateMediaServicesClientAsync(
-            Settings settings,
-            ILogger<Tokenizer> logger)
+        private async Task<IAzureMediaServicesClient> CreateMediaServicesClientAsync()
         {
             //var credentials = await GetCredentialsAsync(config);
             logger.LogInformation($"CreateMediaServicesClientAsync trying to get token");

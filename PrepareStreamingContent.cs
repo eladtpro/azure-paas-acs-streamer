@@ -2,15 +2,19 @@
 {
     public class PrepareStreamingContent
     {
-        [FunctionName(nameof(PrepareStreamingContent))]
-        public static async Task Run(
-        [BlobTrigger("data/{name}", Connection = "Settings:AzureInputStorage")] BlobClient blob, string name,
-        [DurableClient] IDurableOrchestrationClient starter,
-        IOptions<Settings> options, 
-        IStreamingLocatorGenerator generator, 
-        ILogger<PrepareStreamingContent> logger)
+        private readonly Settings settings;
+        private readonly ILogger logger;
+        public PrepareStreamingContent(IOptions<Settings> options, ILogger<PrepareStreamingContent> logger)
         {
-            Settings settings = options.Value;
+            settings = options.Value;
+            this.logger = logger;
+        }
+
+        [FunctionName(nameof(PrepareStreamingContent))]
+        public async Task Run(
+        [BlobTrigger("data/{name}", Connection = "Settings:AzureInputStorage")] BlobClient blob, string name,
+        [DurableClient] IDurableOrchestrationClient starter)
+        {
             logger.LogInformation($"PrepareStreamingContent: C# Blob trigger function Processed blob\n Name:{name}");
             if (settings.AutoProcessStreamingLocator)
                 return;

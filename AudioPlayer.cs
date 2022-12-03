@@ -7,7 +7,7 @@ namespace RadioArchive
         [FunctionName("AudioPlayer")]
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "get")]
-            [SignalRConnectionInfo(HubName = "sr-backend-chunnel.service.signalr.net")] SignalRConnectionInfo connectionInfo,
+            [SignalRConnectionInfo(ConnectionStringSetting = "AzureSignalRConnectionString", HubName = "sr-backend-chunnel")] SignalRConnectionInfo connectionInfo,
             HttpRequest req,
             ExecutionContext context,
             ILogger logger)

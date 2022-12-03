@@ -1,11 +1,8 @@
-﻿using System;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.WebJobs.Extensions.Http;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace RadioArchive
 {
-	public class AudioPlayer
+    public class AudioPlayer
 	{
         [FunctionName("AudioPlayer")]
         public static async Task<IActionResult> Run(
@@ -16,7 +13,10 @@ namespace RadioArchive
         {
             string path = Path.Combine(context.FunctionAppDirectory, "Resources", "AudioPlayerTemplate.html");
             logger.LogInformation($"[AudioPlayer] path: {path}, exists: {File.Exists(path)}");
-            string html = await File.ReadAllTextAsync(path);
+            string template = await File.ReadAllTextAsync(path);
+            string blobName = req.Query["name"];
+            // string baseUrl = $"https://{Environment.GetEnvironmentVariable("WEBSITE_HOSTNAME")}";
+            string html = template.Replace("{blobName}",blobName);
             return new ContentResult { Content = html, ContentType = "text/html" };
         }
     }

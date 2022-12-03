@@ -1,4 +1,6 @@
-﻿namespace RadioArchive
+﻿using System.Threading;
+
+namespace RadioArchive
 {
     public class StreamingLocatorGenerator
     {
@@ -148,6 +150,9 @@
                     await context.CallActivityAsync<Task>(nameof(Notify), $"Waiting: \r{job.Name} - {jobOutput.State} {jobOutput.Progress}%");
                 else
                     break;
+                // Orchestration sleeps until this time.
+                var nextCheck = context.CurrentUtcDateTime.AddSeconds(2);
+                await context.CreateTimer(nextCheck, CancellationToken.None);
             }
             while (
                 job.State != JobState.Finished &&

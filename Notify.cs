@@ -1,6 +1,4 @@
-﻿using Microsoft.Azure.WebJobs.Extensions.SignalRService;
-
-namespace RadioArchive
+﻿namespace RadioArchive
 {
     public static class Notify
     {

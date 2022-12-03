@@ -15,6 +15,7 @@
 			OriginalName = name;
             Name = name.Sanitize();
 			Properties = props;
+			Created = DateTime.UtcNow;
         }
 
 		override public string ToString()

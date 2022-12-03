@@ -26,6 +26,8 @@ global using Microsoft.Azure.WebJobs.Host.Bindings;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Options;
+global using Microsoft.Azure.WebJobs.Extensions.SignalRService;
+
 
 
 

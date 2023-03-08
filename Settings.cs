@@ -16,6 +16,7 @@
         public bool     DeleteJobs                      { get; set; }
         public string   StreamingTransformName          { get; set; }
         public string   AzureMediaServicesScope         { get; set; }
+        public int?     ListBlobsSegmentSize            { get; set; }
 
         public override string ToString()
         {

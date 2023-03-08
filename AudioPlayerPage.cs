@@ -2,9 +2,9 @@
 
 namespace RadioArchive
 {
-    public class AudioPlayer
+    public class AudioPlayerPage
 	{
-        [FunctionName("AudioPlayer")]
+        [FunctionName("AudioPlayerPage")]
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "get")] HttpRequest req,
             [SignalRConnectionInfo(HubName = "sr-backend-channel", ConnectionStringSetting = "AzureSignalRConnectionString")] SignalRConnectionInfo connectionInfo,
@@ -13,8 +13,8 @@ namespace RadioArchive
         {
             
             logger.LogInformation("C# HTTP trigger function processed a request.");
-            string path = Path.Combine(context.FunctionAppDirectory, "Resources", "AudioPlayerTemplate.html");
-            logger.LogInformation($"[AudioPlayer] path: {path}, exists: {File.Exists(path)}");
+            string path = Path.Combine(context.FunctionAppDirectory, "Resources", "AudioPlayerPageTemplate.html");
+            logger.LogInformation($"[AudioPlayerPage] path: {path}, exists: {File.Exists(path)}");
             string template = await File.ReadAllTextAsync(path);
             string blobName = req.Query["name"];
             // string baseUrl = $"https://{Environment.GetEnvironmentVariable("WEBSITE_HOSTNAME")}";

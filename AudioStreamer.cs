@@ -1,4 +1,6 @@
-﻿namespace RadioArchive
+﻿using Microsoft.Azure.Management.Media.Models;
+
+namespace RadioArchive
 {
     public class AudioStreamer
     {
